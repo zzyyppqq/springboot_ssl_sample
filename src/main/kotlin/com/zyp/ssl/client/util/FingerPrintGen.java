@@ -1,4 +1,4 @@
-package com.zyp.ssl.util;
+package com.zyp.ssl.client.util;
 
 import java.io.*;
 import java.security.cert.CertificateFactory;

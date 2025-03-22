@@ -1,6 +1,6 @@
 package com.zyp.ssl.client;
 
-import com.zyp.ssl.util.PublicKeyUtils;
+import com.zyp.ssl.client.util.PublicKeyUtils;
 import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -12,12 +12,8 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import java.io.FileInputStream;
 import java.security.KeyStore;
-import java.security.MessageDigest;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 
 public class SecureClient {
 

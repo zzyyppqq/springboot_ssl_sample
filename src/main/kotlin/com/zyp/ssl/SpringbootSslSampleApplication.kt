@@ -1,28 +1,17 @@
 package com.zyp.ssl
 
-import org.apache.catalina.connector.Connector
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
-import org.springframework.boot.web.servlet.server.ServletWebServerFactory
-import org.springframework.context.annotation.Bean
+
 
 @SpringBootApplication
-class SpringbootSslSampleApplication {
-//    @Bean
-//    fun servletContainer(): ServletWebServerFactory {
-//        val tomcat = TomcatServletWebServerFactory()
-//        tomcat.addAdditionalTomcatConnectors(createStandardConnector())
-//        return tomcat
-//    }
-//
-//    private fun createStandardConnector(): Connector {
-//        val connector = Connector("org.apache.coyote.http11.Http11NioProtocol")
-//        connector.port = 8089
-//        return connector
-//    }
-}
+class SpringbootSslSampleApplication
 
+/**
+ * http默认会进入登陆页面
+ * 账号：user
+ * 密码为控制台输出：Using generated security password: ef97682c-d2a1-4e98-9037-609964d33b6b
+ */
 fun main(args: Array<String>) {
     runApplication<SpringbootSslSampleApplication>(*args)
 }
