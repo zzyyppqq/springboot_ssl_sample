@@ -42,3 +42,16 @@ openssl pkcs8 -topk8 -inform PEM -outform DER -in client.key -out client.der -no
 
 #将 CA 证书导入信任库, java spring使用ca.jks作为信任库
 keytool -import -trustcacerts -alias myca -file ca.crt -keystore ca.jks -storepass "123456"
+
+
+# /Library/Java/JavaVirtualMachines/jdk-17.0.8.jdk/Contents/Home/lib/security
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.8.jdk/Contents/Home
+# 信任到 JDK 的信任库
+keytool -import -file ca.crt -keystore $JAVA_HOME/lib/security/cacerts -alias ca_zyp -storepass changeit
+# 验证 CA 证书是否已导入：
+keytool -list -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
+#查看每个证书的详细信息（如颁发者、有效期等） -v
+keytool -list -v -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit | grep -A 15 ca_zyp
+# 删除
+keytool -delete -alias ca_zyp -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
+

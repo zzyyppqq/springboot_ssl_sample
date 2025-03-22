@@ -225,7 +225,8 @@ sudo keytool -list -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
 #rootca, 2024年11月13日, trustedCertEntry, 
 #证书指纹 (SHA-256): 14:76:62:96:51:91:AE:7F:5F:DD:D5:E6:E5:50:97:E6:AE:80:97:6D:F5:9C:19:1A:4D:74:03:91:DC:3D:55:F0
 
-
+# 删除CA证书
+keytool -delete -alias rootCA -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
 ```
 
 
