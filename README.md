@@ -63,8 +63,8 @@ import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -74,61 +74,61 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class SecureClient {
 
-    public static OkHttpClient createSecureClient() throws Exception {
+   public static OkHttpClient createSecureClient() throws Exception {
 
-        // SSL Pinning: 配置服务器证书哈希
-        CertificatePinner certificatePinner = new CertificatePinner.Builder()
-                .add("yourdomain.com", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=") // 替换成服务器的SHA-256哈希
-                .build();
+      // SSL Pinning: 配置服务器证书哈希
+      CertificatePinner certificatePinner = new CertificatePinner.Builder()
+              .add("yourdomain.com", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=") // 替换成服务器的SHA-256哈希
+              .build();
 
-        // 双向认证: 加载客户端证书
-        KeyStore clientKeyStore = KeyStore.getInstance("PKCS12");
-        FileInputStream clientCert = new FileInputStream("path/to/client_cert.p12"); // 客户端证书路径
-        clientKeyStore.load(clientCert, "client_password".toCharArray()); // 客户端证书密码
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(clientKeyStore, "client_password".toCharArray());
+      // 双向认证: 加载客户端证书
+      KeyStore clientKeyStore = KeyStore.getInstance("PKCS12");
+      FileInputStream clientCert = new FileInputStream("path/to/client_cert.p12"); // 客户端证书路径
+      clientKeyStore.load(clientCert, "client_password".toCharArray()); // 客户端证书密码
+      KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+      keyManagerFactory.init(clientKeyStore, "client_password".toCharArray());
 
-        // 双向认证: 加载服务器CA证书，信任服务器的证书
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        FileInputStream serverCert = new FileInputStream("path/to/server_cert.pem"); // 服务器证书路径
-        X509Certificate caCert = (X509Certificate) cf.generateCertificate(serverCert);
-        KeyStore trustKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        trustKeyStore.load(null, null);
-        trustKeyStore.setCertificateEntry("ca", caCert);
-        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        trustManagerFactory.init(trustKeyStore);
+      // 双向认证: 加载服务器CA证书，信任服务器的证书
+      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+      FileInputStream serverCert = new FileInputStream("path/to/server_cert.pem"); // 服务器证书路径
+      X509Certificate caCert = (X509Certificate) cf.generateCertificate(serverCert);
+      KeyStore trustKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+      trustKeyStore.load(null, null);
+      trustKeyStore.setCertificateEntry("ca", caCert);
+      TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+      trustManagerFactory.init(trustKeyStore);
 
-        // 配置SSLContext以实现双向认证
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+      // 配置SSLContext以实现双向认证
+      SSLContext sslContext = SSLContext.getInstance("TLS");
+      sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
 
-        // 创建OkHttpClient并启用SSL Pinning和双向认证
-        return new OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManagerFactory.getTrustManagers()[0])
-                .certificatePinner(certificatePinner)
-                .build();
-    }
+      // 创建OkHttpClient并启用SSL Pinning和双向认证
+      return new OkHttpClient.Builder()
+              .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManagerFactory.getTrustManagers()[0])
+              .certificatePinner(certificatePinner)
+              .build();
+   }
 
-    public static void main(String[] args) {
-        try {
-            OkHttpClient client = createSecureClient();
+   public static void main(String[] args) {
+      try {
+         OkHttpClient client = createSecureClient();
 
-            // 发送请求
-            Request request = new Request.Builder()
-                    .url("https://yourdomain.com/secure-endpoint")
-                    .build();
+         // 发送请求
+         Request request = new Request.Builder()
+                 .url("https://yourdomain.com/secure-endpoint")
+                 .build();
 
-            try (Response response = client.newCall(request).execute()) {
-                if (response.isSuccessful()) {
-                    System.out.println(response.body().string());
-                } else {
-                    System.out.println("Request failed: " + response.code());
-                }
+         try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful()) {
+               System.out.println(response.body().string());
+            } else {
+               System.out.println("Request failed: " + response.code());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
 }
 
 ```
