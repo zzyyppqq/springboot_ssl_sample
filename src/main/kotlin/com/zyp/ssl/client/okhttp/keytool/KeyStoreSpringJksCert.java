@@ -1,4 +1,4 @@
-package com.zyp.ssl.client.okhttp;
+package com.zyp.ssl.client.okhttp.keytool;
 
 import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
@@ -13,10 +13,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 
-public class OkHttpGoP12Cert {
+public class KeyStoreSpringJksCert {
 
 
     /**
@@ -29,8 +27,8 @@ public class OkHttpGoP12Cert {
         String resourceDirPath = projectPath + "/src/main/resources/";
         // 加载客户端证书和私钥
         KeyStore clientKeyStore = KeyStore.getInstance("PKCS12");
-        try (InputStream keyStoreStream = new FileInputStream(resourceDirPath + "ca/client.p12")) {
-            clientKeyStore.load(keyStoreStream, "".toCharArray());
+        try (InputStream keyStoreStream = new FileInputStream(resourceDirPath + "cert_keytool/client.jks")) {
+            clientKeyStore.load(keyStoreStream, "123456".toCharArray());
         }
         if (clientKeyStore.size() == 0) {
             throw new RuntimeException("ClientKeyStore is empty!");
@@ -38,20 +36,22 @@ public class OkHttpGoP12Cert {
 
         // 初始化 KeyManagerFactory
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(clientKeyStore, "".toCharArray());
+        keyManagerFactory.init(clientKeyStore, "123456".toCharArray());
 
 
         // 加载 CA 根证书
         // 转换p12必须有私钥，才能进行双向认证，适用于双向认证
         // crt生成p12必须包含-inkey ca.key，不能使用-nokeys
         // openssl pkcs12 -export -out ca.p12 -inkey ca.key -in ca.crt
+
         KeyStore trustStore = KeyStore.getInstance("PKCS12");
-        try (InputStream trustStoreStream = new FileInputStream(resourceDirPath + "ca/ca.p12")) {
-            trustStore.load(trustStoreStream, "".toCharArray());
+        try (InputStream trustStoreStream = new FileInputStream(resourceDirPath + "cert_keytool/truststore.jks")) {
+            trustStore.load(trustStoreStream, "123456".toCharArray());
         }
         if (trustStore.size() == 0) {
             throw new RuntimeException("TrustStore is empty!");
         }
+
 
         // 初始化 TrustManagerFactory
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());

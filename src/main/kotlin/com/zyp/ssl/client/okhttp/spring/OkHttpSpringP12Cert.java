@@ -1,4 +1,4 @@
-package com.zyp.ssl.client.okhttp;
+package com.zyp.ssl.client.okhttp.spring;
 
 import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
@@ -13,10 +13,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 
-public class OkHttpGoClientP12Cert {
+public class OkHttpSpringP12Cert {
 
 
     /**
@@ -29,9 +27,11 @@ public class OkHttpGoClientP12Cert {
         String resourceDirPath = projectPath + "/src/main/resources/";
         // 加载客户端证书和私钥
         KeyStore clientKeyStore = KeyStore.getInstance("PKCS12");
-
         try (InputStream keyStoreStream = new FileInputStream(resourceDirPath + "ca/client.p12")) {
             clientKeyStore.load(keyStoreStream, "".toCharArray());
+        }
+        if (clientKeyStore.size() == 0) {
+            throw new RuntimeException("ClientKeyStore is empty!");
         }
 
         // 初始化 KeyManagerFactory
@@ -39,24 +39,23 @@ public class OkHttpGoClientP12Cert {
         keyManagerFactory.init(clientKeyStore, "".toCharArray());
 
 
-        // 加载 CA 根证书 ok
-//        KeyStore trustStore = KeyStore.getInstance("PKCS12");
-//        try (InputStream trustStoreStream = new FileInputStream(resourceDirPath + "ca/ca_jks_convert.p12")) {
-//            trustStore.load(trustStoreStream, "123456".toCharArray());
-//        }
-
-        // 加载 CA 根证书（如果需要）
-        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        trustStore.load(null, null); // 创建一个空的信任库
-        try (InputStream caCertStream = new FileInputStream(resourceDirPath + "ca/ca.crt")) {
-            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-            Certificate caCert = certificateFactory.generateCertificate(caCertStream);
-            trustStore.setCertificateEntry("ca", caCert);
+        // 加载 CA 根证书
+        // 转换p12必须有私钥，才能进行双向认证，适用于双向认证
+        // crt生成p12必须包含-inkey ca.key，不能使用-nokeys
+        // openssl pkcs12 -export -out ca.p12 -inkey ca.key -in ca.crt
+        // 使用ca_jks_convert.p12也可以使用，里面只包含了公钥，通过jks转p12，不能使用openssl转
+        KeyStore trustStore = KeyStore.getInstance("PKCS12");
+        try (InputStream trustStoreStream = new FileInputStream(resourceDirPath + "ca/ca_jks_convert.p12")) {
+            trustStore.load(trustStoreStream, "123456".toCharArray());
+        }
+        if (trustStore.size() == 0) {
+            throw new RuntimeException("TrustStore is empty!");
         }
 
         // 初始化 TrustManagerFactory
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustManagerFactory.init(trustStore);
+
 
         // 配置 SSLContext
         SSLContext sslContext = SSLContext.getInstance("TLS");
